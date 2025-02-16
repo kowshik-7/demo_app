@@ -34,7 +34,7 @@ const ChatInput = ({
         onChange={(e) => setMessage(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="resize-none min-h-[60px] max-h-[120px]"
+        className="resize-none min-h-[60px] max-h-[120px] flex-row"
         rows={2}
       />
       <Button

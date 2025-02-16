@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ChatInterface from "./ChatInterface";
 import VisualizationPanel from "./VisualizationPanel";
+import { chatWithGemini } from "@/lib/gemini";
 
 interface HomeProps {
   initialMessages?: Array<{
@@ -81,6 +82,11 @@ export default function Home({
           timestamp: new Date().toISOString(),
         },
       ]);
+
+      // TODO: Actually process the Excel file here
+      // For now using sample data
+      setData(initialData);
+      setChartData(initialChartData);
     } catch (error) {
       setUploadError("Error uploading file. Please try again.");
     } finally {
@@ -102,23 +108,38 @@ export default function Home({
     ]);
 
     setIsProcessing(true);
+    setChartType("chat"); // Switch to chat view immediately when user sends message
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Call Gemini API with the message and current data
+      const aiResponse = await chatWithGemini(message, data);
+
+      // Add AI response
       setMessages((prev) => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
-          content: "I'm analyzing your request. Here's what I found...",
+          id: Date.now().toString(),
+          content: aiResponse,
           sender: "ai",
           timestamp: new Date().toISOString(),
         },
       ]);
+    } catch (error) {
+      console.error("Error processing message:", error);
+      // Add error message to chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          content:
+            "Sorry, I encountered an error processing your request. Please try again.",
+          sender: "ai",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } finally {
       setIsProcessing(false);
-
-      // Switch to chat view when there's a new message
-      setChartType("chat");
-    }, 1500);
+    }
   };
 
   return (
